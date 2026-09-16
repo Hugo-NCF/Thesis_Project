@@ -23,6 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 
-# Ignore thesis datasets
+# Large thesis datasets
 data/raw/
 data/processed/
