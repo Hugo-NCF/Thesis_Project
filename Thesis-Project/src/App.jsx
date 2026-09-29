@@ -1,97 +1,70 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
+
+import {
+  loadAnimeData,
+  searchAnime,
+  filterByGenre,
+  filterByMinimumScore,
+  calculateAverageScore
+} from './utils/animeData'
+
 
 function App() {
   const [anime, setAnime] = useState([])
   const [search, setSearch] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [selectedGenre, setSelectedGenre] = useState('All')
+  const [minimumScore, setMinimumScore] = useState(null)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  useEffect(() => {
-    fetch('/data/animes-sample.json')
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Could not load anime dataset')
-        }
 
-        return response.json()
-      })
-      .then((data) => {
+  // ----------------------------------------------------------
+  // WEEK 1
+  // Load your dataset when React first opens.
+  // ----------------------------------------------------------
+
+  useEffect(() => {
+    async function getAnime() {
+      setLoading(true)
+
+      try {
+        const data = await loadAnimeData()
         setAnime(data)
+      } catch (err) {
+        setError(err.message)
+      } finally {
         setLoading(false)
-      })
-      .catch((error) => {
-        setError(error.message)
-        setLoading(false)
-      })
+      }
+    }
+
+    getAnime()
   }, [])
 
-  const filteredAnime = useMemo(() => {
-    const searchText = search.toLowerCase().trim()
 
-    if (!searchText) {
-      return anime
-    }
+  // ----------------------------------------------------------
+  // WEEK 3
+  // Search and filter the anime data.
+  // ----------------------------------------------------------
 
-    return anime.filter((item) => {
-      const title = item.title?.toLowerCase() || ''
+  let displayedAnime = anime
 
-      const genres = Array.isArray(item.genre)
-        ? item.genre.join(' ').toLowerCase()
-        : ''
+  displayedAnime = searchAnime(displayedAnime, search)
+  displayedAnime = filterByGenre(displayedAnime, selectedGenre)
+  displayedAnime = filterByMinimumScore(displayedAnime, minimumScore)
 
-      return (
-        title.includes(searchText) ||
-        genres.includes(searchText)
-      )
-    })
-  }, [anime, search])
 
-  const averageScore = useMemo(() => {
-    const scores = anime
-      .map((item) => Number(item.score))
-      .filter((score) => Number.isFinite(score) && score > 0)
+  // ----------------------------------------------------------
+  // WEEK 2
+  // Dataset statistic.
+  // ----------------------------------------------------------
 
-    if (scores.length === 0) {
-      return 'N/A'
-    }
+  const averageScore = calculateAverageScore(anime)
 
-    const total = scores.reduce(
-      (sum, score) => sum + score,
-      0
-    )
-
-    return (total / scores.length).toFixed(2)
-  }, [anime])
-
-  if (loading) {
-    return (
-      <main className="app">
-        <h1>Anime Recommender</h1>
-        <p>Loading anime dataset...</p>
-      </main>
-    )
-  }
-
-  if (error) {
-    return (
-      <main className="app">
-        <h1>Anime Recommender</h1>
-        <h2>Dataset Error</h2>
-        <p>{error}</p>
-
-        <p>
-          Run:
-          <code>
-            python3 scripts/prepare_anime_data.py
-          </code>
-        </p>
-      </main>
-    )
-  }
 
   return (
     <main className="app">
+
       <header>
         <p className="label">
           NCF Computer Science Thesis
@@ -100,18 +73,47 @@ function App() {
         <h1>Anime Recommender</h1>
 
         <p>
-          Exploring the MyAnimeList dataset as the first
-          step toward building a personalized anime
+          Exploring anime data and building a personalized
           recommendation system.
         </p>
       </header>
 
-      <section className="success">
-        ✅ Dataset loaded successfully — React is using{' '}
-        <strong>{anime.length}</strong> anime records.
+
+      {/* DATASET STATUS */}
+
+      <section className="status-panel">
+
+        <h2>Dataset Status</h2>
+
+        {loading && (
+          <p>Loading dataset...</p>
+        )}
+
+        {error && (
+          <p className="error">
+            {error}
+          </p>
+        )}
+
+        {!loading && !error && anime.length > 0 && (
+          <p className="success-text">
+            Dataset successfully loaded.
+          </p>
+        )}
+
+        {!loading && !error && anime.length === 0 && (
+          <p>
+            No anime data was loaded.
+          </p>
+        )}
+
       </section>
 
+
+      {/* DATASET STATISTICS */}
+
       <section className="stats">
+
         <div className="stat">
           <span>Anime Loaded</span>
           <strong>{anime.length}</strong>
@@ -119,24 +121,33 @@ function App() {
 
         <div className="stat">
           <span>Average Score</span>
-          <strong>{averageScore}</strong>
+          <strong>{averageScore.toFixed(2)}</strong>
         </div>
 
         <div className="stat">
           <span>Search Results</span>
-          <strong>{filteredAnime.length}</strong>
+          <strong>{displayedAnime.length}</strong>
         </div>
+
       </section>
 
+
+      {/* DATASET EXPLORER */}
+
       <section className="explorer">
+
         <div className="explorer-header">
+
           <div>
             <p className="label">
               Dataset Explorer
             </p>
 
-            <h2>Browse Anime</h2>
+            <h2>
+              Browse Anime
+            </h2>
           </div>
+
 
           <input
             type="search"
@@ -146,12 +157,58 @@ function App() {
               setSearch(event.target.value)
             }
           />
+
         </div>
 
+
+        {/* FILTERS */}
+
+        <div className="filters">
+
+          <select
+            value={selectedGenre}
+            onChange={(event) =>
+              setSelectedGenre(event.target.value)
+            }
+          >
+            <option value="All">All Genres</option>
+            <option value="Action">Action</option>
+            <option value="Adventure">Adventure</option>
+            <option value="Comedy">Comedy</option>
+            <option value="Drama">Drama</option>
+            <option value="Fantasy">Fantasy</option>
+            <option value="Romance">Romance</option>
+          </select>
+
+
+          <select
+            value={minimumScore ?? ''}
+            onChange={(event) => {
+              const value = event.target.value
+
+              setMinimumScore(
+                value === '' ? null : parseFloat(value)
+              )
+            }}
+          >
+            <option value="">Any Rating</option>
+            <option value="6">6+</option>
+            <option value="7">7+</option>
+            <option value="8">8+</option>
+            <option value="9">9+</option>
+          </select>
+
+        </div>
+
+
+        {/* ANIME CARDS */}
+
         <div className="anime-grid">
-          {filteredAnime
+
+          {displayedAnime
             .slice(0, 24)
             .map((item, index) => (
+
               <article
                 className="anime-card"
                 key={
@@ -159,6 +216,7 @@ function App() {
                   `${item.title}-${index}`
                 }
               >
+
                 {item.img_url ? (
                   <img
                     src={item.img_url}
@@ -170,8 +228,12 @@ function App() {
                   </div>
                 )}
 
+
                 <div className="anime-info">
-                  <h3>{item.title}</h3>
+
+                  <h3>
+                    {item.title}
+                  </h3>
 
                   <p>
                     ⭐ {item.score || 'N/A'}
@@ -179,26 +241,51 @@ function App() {
                     {item.episodes || 'N/A'} episodes
                   </p>
 
+
                   <div className="genres">
+
                     {item.genre
                       ?.slice(0, 4)
                       .map((genre) => (
+
                         <span key={genre}>
                           {genre}
                         </span>
+
                       ))}
+
                   </div>
+
                 </div>
+
               </article>
+
             ))}
+
         </div>
 
-        {filteredAnime.length === 0 && (
-          <p>No anime matched your search.</p>
+
+        {!loading && displayedAnime.length === 0 && (
+
+          <div className="empty-state">
+
+            <h3>
+              No anime found.
+            </h3>
+
+            <p>
+              Try changing your search or filters.
+            </p>
+
+          </div>
+
         )}
+
       </section>
+
     </main>
   )
 }
+
 
 export default App
