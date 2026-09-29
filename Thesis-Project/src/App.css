@@ -2,161 +2,890 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 .app {
   width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 40px 24px;
-  text-align: left;
+  min-height: 100vh;
+  background: #09090b;
+  color: #f4f4f5;
 }
 
-header {
-  margin-bottom: 30px;
+
+/* ========================================
+   NAVIGATION
+======================================== */
+
+.top-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
+  height: 72px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 5%;
+
+  background: rgba(9, 9, 11, 0.92);
+
+  backdrop-filter: blur(16px);
+
+  border-bottom: 1px solid #27272a;
 }
 
-header h1 {
-  margin: 5px 0 12px;
+.brand {
+  color: white;
+
+  font-size: 27px;
+  font-weight: 800;
+
+  letter-spacing: -1px;
+
+  text-decoration: none;
 }
 
-.label {
+.brand span {
+  color: #e50914;
+}
+
+.nav-links {
+  display: flex;
+
+  gap: 28px;
+
+  margin-left: 48px;
+}
+
+.nav-links a {
+  color: #a1a1aa;
+
+  text-decoration: none;
+
   font-size: 14px;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+
+  transition: color 0.2s ease;
 }
 
-.success {
-  padding: 16px;
-  border: 1px solid #4caf50;
-  border-radius: 10px;
-  margin-bottom: 25px;
+.nav-links a:hover {
+  color: white;
 }
+
+.avatar {
+  margin-left: auto;
+
+  width: 36px;
+  height: 36px;
+
+  border-radius: 8px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #e50914;
+
+  font-weight: 700;
+}
+
+
+/* ========================================
+   HERO
+======================================== */
+
+.hero-section {
+  min-height: 440px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 72px 6%;
+
+  background:
+    radial-gradient(
+      circle at 80% 30%,
+      rgba(229, 9, 20, 0.18),
+      transparent 34%
+    ),
+    linear-gradient(
+      135deg,
+      #09090b 0%,
+      #111116 60%,
+      #18181b 100%
+    );
+
+  border-bottom: 1px solid #27272a;
+}
+
+.hero-content {
+  max-width: 700px;
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+
+  color: #e50914;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  letter-spacing: 1.7px;
+
+  text-transform: uppercase;
+}
+
+.hero-section h1 {
+  max-width: 680px;
+
+  margin: 0;
+
+  color: white;
+
+  font-size: clamp(42px, 6vw, 72px);
+
+  line-height: 0.98;
+
+  letter-spacing: -3px;
+}
+
+.hero-description {
+  max-width: 580px;
+
+  margin: 24px 0;
+
+  color: #a1a1aa;
+
+  font-size: 17px;
+
+  line-height: 1.6;
+}
+
+.primary-button {
+  display: inline-block;
+
+  padding: 12px 20px;
+
+  border-radius: 7px;
+
+  background: white;
+
+  color: #111;
+
+  text-decoration: none;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.primary-button:hover {
+  transform: translateY(-2px);
+
+  background: #e4e4e7;
+}
+
+
+/* ========================================
+   COMMON SECTIONS
+======================================== */
+
+.development-section,
+.analytics-section,
+.explorer {
+  width: 88%;
+  max-width: 1400px;
+
+  margin: 0 auto;
+
+  padding: 64px 0;
+}
+
+.section-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+
+  gap: 24px;
+
+  margin-bottom: 24px;
+}
+
+.section-heading {
+  margin-bottom: 28px;
+}
+
+.section-heading h2,
+.section-title-row h2 {
+  margin: 0;
+
+  color: white;
+
+  font-size: 30px;
+
+  letter-spacing: -1px;
+}
+
+.section-heading > p:last-child {
+  margin-top: 8px;
+
+  color: #71717a;
+
+  font-size: 14px;
+}
+
+
+/* ========================================
+   STATUS
+======================================== */
+
+.development-section {
+  padding-bottom: 28px;
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 8px 12px;
+
+  border: 1px solid #14532d;
+
+  border-radius: 999px;
+
+  background: rgba(34, 197, 94, 0.08);
+
+  color: #86efac;
+
+  font-size: 12px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+
+  border-radius: 50%;
+
+  background: #22c55e;
+}
+
+.error {
+  color: #f87171;
+}
+
+
+/* ========================================
+   STATS
+======================================== */
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
-  margin-bottom: 35px;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 14px;
 }
 
 .stat {
-  padding: 20px;
-  border: 1px solid #444;
-  border-radius: 10px;
+  padding: 22px;
+
+  border: 1px solid #27272a;
+
+  border-radius: 12px;
+
+  background: #111113;
 }
 
 .stat span {
   display: block;
-  font-size: 14px;
+
   margin-bottom: 8px;
+
+  color: #71717a;
+
+  font-size: 12px;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.8px;
 }
 
 .stat strong {
-  font-size: 28px;
+  color: white;
+
+  font-size: 30px;
+
+  letter-spacing: -1px;
 }
 
-.explorer {
-  margin-top: 20px;
+
+/* ========================================
+   CHARTS
+======================================== */
+
+.analytics-section {
+  padding-top: 36px;
 }
 
-.explorer-header {
+.charts-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 18px;
+}
+
+.chart-card {
+  padding: 24px;
+
+  border: 1px solid #27272a;
+
+  border-radius: 14px;
+
+  background: #111113;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+
+  margin-bottom: 28px;
+}
+
+.chart-kicker {
+  color: #71717a;
+
+  font-size: 11px;
+
+  letter-spacing: 1px;
+
+  text-transform: uppercase;
+}
+
+.chart-header h3 {
+  margin: 5px 0 0;
+
+  color: white;
+
+  font-size: 19px;
+}
+
+.chart-note {
+  padding: 5px 8px;
+
+  border-radius: 5px;
+
+  background: #27272a;
+
+  color: #a1a1aa;
+
+  font-size: 11px;
+}
+
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+
+  gap: 15px;
+}
+
+.bar-label {
+  display: flex;
+  justify-content: space-between;
+
+  margin-bottom: 6px;
+
+  color: #d4d4d8;
+
+  font-size: 12px;
+}
+
+.bar-label strong {
+  color: #71717a;
+}
+
+.bar-track {
+  height: 7px;
+
+  overflow: hidden;
+
+  border-radius: 999px;
+
+  background: #27272a;
+}
+
+.bar-fill {
+  height: 100%;
+
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #e50914,
+      #ff4550
+    );
+}
+
+.secondary-fill {
+  background:
+    linear-gradient(
+      90deg,
+      #7c3aed,
+      #a78bfa
+    );
+}
+
+
+/* ========================================
+   SEARCH + FILTERS
+======================================== */
+
+.search-filter-panel {
+  display: flex;
+  align-items: end;
+
+  gap: 14px;
+
+  padding: 16px;
+
+  margin-bottom: 32px;
+
+  border: 1px solid #27272a;
+
+  border-radius: 14px;
+
+  background: #111113;
+}
+
+.search-wrapper {
+  position: relative;
+
+  flex: 1;
+}
+
+.search-icon {
+  position: absolute;
+
+  top: 50%;
+  left: 15px;
+
+  width: 19px;
+
+  color: #71717a;
+
+  transform: translateY(-50%);
+
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+
+  height: 48px;
+
+  padding: 0 16px 0 45px;
+
+  border: 1px solid #3f3f46;
+
+  border-radius: 8px;
+
+  outline: none;
+
+  background: #18181b;
+
+  color: white;
+
+  font-size: 14px;
+
+  transition:
+    border 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.search-input:focus {
+  border-color: #e50914;
+
+  box-shadow:
+    0 0 0 3px rgba(229, 9, 20, 0.12);
+}
+
+.search-input::placeholder {
+  color: #71717a;
+}
+
+.filters {
+  display: flex;
+
+  gap: 10px;
+}
+
+.filter-control {
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+}
+
+.filter-control > span {
+  color: #71717a;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  letter-spacing: 0.7px;
+
+  text-transform: uppercase;
+}
+
+.filter-control select {
+  min-width: 150px;
+  height: 48px;
+
+  padding: 0 12px;
+
+  border: 1px solid #3f3f46;
+
+  border-radius: 8px;
+
+  outline: none;
+
+  background: #18181b;
+
+  color: white;
+
+  cursor: pointer;
+}
+
+
+/* ========================================
+   RESULTS
+======================================== */
+
+.results-heading {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 20px;
-  margin-bottom: 25px;
+
+  margin-bottom: 18px;
 }
 
-.explorer-header h2 {
-  margin: 5px 0;
+.results-heading h3 {
+  margin: 0;
+
+  color: white;
+
+  font-size: 20px;
 }
 
-input {
-  width: 320px;
-  max-width: 100%;
-  padding: 12px 14px;
-  border-radius: 8px;
-  border: 1px solid #666;
-  font-size: 16px;
+.results-heading span {
+  color: #71717a;
+
+  font-size: 12px;
 }
+
+
+/* ========================================
+   ANIME CARDS
+======================================== */
 
 .anime-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+
+  grid-template-columns:
+    repeat(6, minmax(0, 1fr));
+
+  gap: 14px;
 }
 
 .anime-card {
-  border: 1px solid #444;
-  border-radius: 10px;
   overflow: hidden;
+
+  border-radius: 9px;
+
+  background: #111113;
+
+  transition:
+    transform 0.22s ease,
+    background 0.22s ease;
 }
 
-.anime-card img,
+.anime-card:hover {
+  z-index: 5;
+
+  transform: translateY(-5px) scale(1.02);
+
+  background: #18181b;
+}
+
+.poster-wrapper {
+  position: relative;
+
+  overflow: hidden;
+
+  aspect-ratio: 2 / 3;
+
+  background: #18181b;
+}
+
+.poster-wrapper img,
 .no-image {
   width: 100%;
-  height: 280px;
+  height: 100%;
+
   object-fit: cover;
+}
+
+.anime-card:hover img {
+  transform: scale(1.04);
+}
+
+.poster-wrapper img {
+  transition: transform 0.3s ease;
 }
 
 .no-image {
   display: flex;
   align-items: center;
   justify-content: center;
+
+  color: #52525b;
+
+  font-size: 12px;
+}
+
+.score-badge {
+  position: absolute;
+
+  right: 8px;
+  bottom: 8px;
+
+  padding: 4px 7px;
+
+  border-radius: 5px;
+
+  background: rgba(9, 9, 11, 0.86);
+
+  color: #facc15;
+
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .anime-info {
-  padding: 15px;
+  padding: 12px;
 }
 
 .anime-info h3 {
-  margin: 0 0 10px;
-  font-size: 18px;
+  overflow: hidden;
+
+  margin: 0 0 5px;
+
+  color: white;
+
+  font-size: 14px;
+
+  line-height: 1.3;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
 }
 
-.anime-info p {
-  font-size: 14px;
-  margin-bottom: 12px;
+.anime-meta {
+  margin: 0 0 10px;
+
+  color: #71717a;
+
+  font-size: 11px;
 }
 
 .genres {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+
+  gap: 4px;
 }
 
 .genres span {
-  border: 1px solid #666;
-  padding: 4px 7px;
-  border-radius: 6px;
+  padding: 3px 6px;
+
+  border-radius: 4px;
+
+  background: #27272a;
+
+  color: #a1a1aa;
+
+  font-size: 9px;
+}
+
+
+/* ========================================
+   EMPTY STATE
+======================================== */
+
+.empty-state {
+  padding: 80px 20px;
+
+  text-align: center;
+}
+
+.empty-icon {
+  color: #52525b;
+
+  font-size: 42px;
+}
+
+.empty-state h3 {
+  margin: 12px 0 5px;
+
+  color: white;
+}
+
+.empty-state p {
+  color: #71717a;
+}
+
+
+/* ========================================
+   FOOTER
+======================================== */
+
+footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  width: 88%;
+  max-width: 1400px;
+
+  margin: 40px auto 0;
+
+  padding: 28px 0;
+
+  border-top: 1px solid #27272a;
+}
+
+.footer-brand {
+  font-size: 20px;
+}
+
+footer p {
+  color: #52525b;
+
   font-size: 12px;
 }
 
-code {
-  margin-left: 6px;
+
+/* ========================================
+   RESPONSIVE
+======================================== */
+
+@media (max-width: 1100px) {
+
+  .anime-grid {
+    grid-template-columns:
+      repeat(4, minmax(0, 1fr));
+  }
+
 }
 
-@media (max-width: 900px) {
+
+@media (max-width: 850px) {
+
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .search-filter-panel {
+    align-items: stretch;
+
+    flex-direction: column;
+  }
+
+  .filters {
+    width: 100%;
+  }
+
+  .filter-control {
+    flex: 1;
+  }
+
+  .filter-control select {
+    width: 100%;
+  }
+
   .anime-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .top-nav {
+    padding: 0 20px;
+  }
+
+  .nav-links {
+    display: none;
+  }
+
+  .hero-section {
+    min-height: 380px;
+
+    padding: 60px 24px;
+  }
+
+  .hero-section h1 {
+    letter-spacing: -2px;
+  }
+
+  .development-section,
+  .analytics-section,
+  .explorer {
+    width: calc(100% - 40px);
+  }
+
+  .section-title-row {
+    align-items: flex-start;
+
+    flex-direction: column;
   }
 
   .stats {
     grid-template-columns: 1fr;
   }
-}
 
-@media (max-width: 550px) {
-  .anime-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .explorer-header {
-    align-items: stretch;
+  .filters {
     flex-direction: column;
   }
 
-  input {
-    width: 100%;
+  .anime-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
   }
+
+  footer {
+    width: calc(100% - 40px);
+
+    align-items: flex-start;
+
+    flex-direction: column;
+
+    gap: 10px;
+  }
+
 }
