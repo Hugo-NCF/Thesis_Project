@@ -29,7 +29,10 @@ def create_user(username, email, password):
     user = {
         "username": username,
         "email": email,
-        "password_hash": hashed_password_str
+        "password_hash": hashed_password_str,
+        "favorites": [],
+        "watchlist": [],
+        "watched": []
     }
 
     # insert user into MongoDB
@@ -87,33 +90,178 @@ def login_user(identifier, password):
         }
     }
 
+def add_favorite(identifier, anime_id):
+    # finds the user
+    user = find_user(identifier)
 
+    # if user not found, return error
+    if not user:
+        return {"error": "User not found"}
     
+    # gets user collection
+    users_collection = get_users_collection()
+
+    # updates the user's favorites list using $addToSet
+    result = users_collection.update_one(
+        {"_id": user["_id"]},
+        {"$addToSet": {"favorites": anime_id}}
+    )
+
+    # returns success message
+    if result.modified_count > 0:
+        return {"message": "Anime added to favorites"}
+    else:
+        return {"message": "Anime was already in favorites"}
+    
+def remove_favorite(identifier, anime_id):
+    # finds user
+    user = find_user(identifier)
+
+    # if user not found, return error
+    if not user:
+        return {"error": "User not found"}
+    
+    # gets user collection
+    users_collection = get_users_collection()
+
+    # remove anime from user's favorites list using $pull
+    result = users_collection.update_one(
+        {"_id": user["_id"]},
+        {"$pull": {"favorites": anime_id}}
+    )
+
+    # returns whether any anime was removed from favorites
+    if result.modified_count > 0:
+        return {"message": "Anime removed from favorites"}
+    else:
+        return {"message": "Anime was not in favorites"}
+
+def add_to_watchlist(identifier, anime_id):
+    # finds the user
+    user = find_user(identifier)
+
+    # if user not found, return error
+    if not user:
+        return {"error": "User not found"}
+    
+    # gets user collection
+    users_collection = get_users_collection()
+
+    # updates the user's watchlist using $addToSet
+    result = users_collection.update_one(
+        {"_id": user["_id"]},
+        {"$addToSet": {"watchlist": anime_id}}
+    )
+
+    # returns success message
+    if result.modified_count > 0:
+        return {"message": "Anime added to watchlist"}
+    else:
+        return {"message": "Anime was already in watchlist"}
+    
+def remove_from_watchlist(identifier, anime_id):
+    # finds user
+    user = find_user(identifier)
+
+    # if user not found, return error
+    if not user:
+        return {"error": "User not found"}
+    
+    # gets user collection
+    users_collection = get_users_collection()
+
+    # remove anime from user's watchlist using $pull
+    result = users_collection.update_one(
+        {"_id": user["_id"]},
+        {"$pull": {"watchlist": anime_id}}
+    )
+
+    # returns whether any anime was removed from watchlist
+    if result.modified_count > 0:
+        return {"message": "Anime removed from watchlist"}
+    else:
+        return {"message": "Anime was not in watchlist"}
+    
+def mark_as_watched(identifier, anime_id):
+    # finds the user
+    user = find_user(identifier)
+
+    # if user not found, return error
+    if not user:
+        return {"error": "User not found"}
+    
+    # gets user collection
+    users_collection = get_users_collection()
+
+    # updates the user's watched list using $addToSet
+    result = users_collection.update_one(
+        {"_id": user["_id"]},
+        {"$addToSet": {"watched": anime_id}}
+    )
+
+    # returns success message
+    if result.modified_count > 0:
+        return {"message": "Anime marked as watched"}
+    else:
+        return {"message": "Anime was already marked as watched"}
+    
+def remove_from_watched(identifier, anime_id):
+    # finds user
+    user = find_user(identifier)
+
+    # if user not found, return error
+    if not user:
+        return {"error": "User not found"}
+    
+    # gets user collection
+    users_collection = get_users_collection()
+
+    # remove anime from user's watched list using $pull
+    result = users_collection.update_one(
+        {"_id": user["_id"]},
+        {"$pull": {"watched": anime_id}}
+    )
+
+    # returns whether any anime was removed from watched list
+    if result.modified_count > 0:
+        return {"message": "Anime removed from watched list"}
+    else:
+        return {"message": "Anime was not in watched list"}
+
+# helper functions
+def get_favorites(identifier):
+    # finds the user
+    user = find_user(identifier)
+
+    # if user not found, return error
+    if not user:
+        return {"error": "User not found"}
+    
+    # returns users favorites list
+    return {"favorites": user.get("favorites", [])}
+
+def get_watchlist(identifier):
+    # finds the user
+    user = find_user(identifier)
+
+    # if user not found, return error
+    if not user:
+        return {"error": "User not found"}
+    
+    # returns users watchlist
+    return {"watchlist": user.get("watchlist", [])}
+
+def get_watched(identifier):
+    # finds the user
+    user = find_user(identifier)
+
+    # if user not found, return error
+    if not user:
+        return {"error": "User not found"}
+    
+    # returns users watched list
+    return {"watched": user.get("watched", [])}
 
 
 
 # testing for user creation 
-if __name__ == "__main__":
-    print("TEST 1: Correct login")
-    print(
-        login_user(
-            "testuser",
-            "password123"
-        )
-    )
-
-    print("\nTEST 2: Wrong password")
-    print(
-        login_user(
-            "testuser",
-            "wrongpassword"
-        )
-    )
-
-    print("\nTEST 3: User does not exist")
-    print(
-        login_user(
-            "notarealuser",
-            "password123"
-        )
-    )
