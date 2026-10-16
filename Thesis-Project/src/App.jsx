@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import './App.css'
 
+import AccountModal from './components/AccountModal'
+
 import {
   loadAnimeData,
   searchAnime,
@@ -28,6 +30,15 @@ function App() {
 
   // stores any error that happens while loading the dataset
   const [error, setError] = useState('')
+
+  // stores the currently logged-in user
+  const [currentUser, setCurrentUser] = useState(null)
+
+  // controls whether the login/signup window is open
+  const [accountOpen, setAccountOpen] = useState(false)
+
+  // controls whether the modal shows login or signup
+  const [accountMode, setAccountMode] = useState('login')
 
 
   // ----------------------------------------------------------
@@ -263,10 +274,70 @@ function App() {
         </div>
 
 
-        {/* temporary profile icon */}
-        <div className="avatar">
-          A
-        </div>
+        {/* ACCOUNT AREA */}
+
+<div className="account-nav">
+
+{!currentUser ? (
+  <>
+    <button
+      className="nav-login"
+      onClick={() => {
+        setAccountMode('login')
+        setAccountOpen(true)
+      }}
+    >
+      Login
+    </button>
+
+
+    <button
+      className="nav-signup"
+      onClick={() => {
+        setAccountMode('register')
+        setAccountOpen(true)
+      }}
+    >
+      Sign Up
+    </button>
+  </>
+) : (
+  <>
+    <div className="profile-pill">
+
+      <div className="avatar">
+        {currentUser.username
+          .charAt(0)
+          .toUpperCase()}
+      </div>
+
+      <div className="profile-nav-info">
+
+        <strong>
+          {currentUser.username}
+        </strong>
+
+        <span>
+          {currentUser.email}
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <button
+      className="logout-button"
+      onClick={() =>
+        setCurrentUser(null)
+      }
+    >
+      Logout
+    </button>
+  </>
+)}
+
+</div>
 
       </nav>
 
@@ -306,6 +377,63 @@ function App() {
         </div>
 
       </section>
+
+      {/* BASIC PROFILE PREVIEW */}
+
+{currentUser && (
+
+<section className="profile-section">
+
+  <div className="profile-card">
+
+    <div className="large-avatar">
+      {currentUser.username
+        .charAt(0)
+        .toUpperCase()}
+    </div>
+
+
+    <div className="profile-details">
+
+      <p className="eyebrow">
+        Your AniMatch Profile
+      </p>
+
+      <h2>
+        {currentUser.username}
+      </h2>
+
+      <p>
+        {currentUser.email}
+      </p>
+
+    </div>
+
+
+    <div className="profile-lists">
+
+      <div>
+        <strong>Favorites</strong>
+        <span>Coming next</span>
+      </div>
+
+      <div>
+        <strong>Watchlist</strong>
+        <span>Coming next</span>
+      </div>
+
+      <div>
+        <strong>Watched</strong>
+        <span>Coming next</span>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+)}
 
 
       {/* DATASET STATUS */}
@@ -935,6 +1063,23 @@ function App() {
         </p>
 
       </footer>
+
+{/* LOGIN / SIGN UP MODAL */}
+
+{accountOpen && (
+
+<AccountModal
+  mode={accountMode}
+  setMode={setAccountMode}
+  onClose={() =>
+    setAccountOpen(false)
+  }
+  onLogin={(user) =>
+    setCurrentUser(user)
+  }
+/>
+
+)}
 
     </main>
   )

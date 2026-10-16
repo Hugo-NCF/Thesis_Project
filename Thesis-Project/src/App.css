@@ -889,3 +889,464 @@ footer p {
   }
 
 }
+
+/* ========================================
+   ACCOUNT NAVIGATION
+======================================== */
+
+.account-nav {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  margin-left: auto;
+}
+
+.nav-login,
+.nav-signup,
+.logout-button {
+  border: none;
+
+  cursor: pointer;
+
+  font: inherit;
+}
+
+.nav-login {
+  padding: 9px 14px;
+
+  background: transparent;
+
+  color: #d4d4d8;
+
+  font-size: 13px;
+}
+
+.nav-login:hover {
+  color: white;
+}
+
+.nav-signup {
+  padding: 9px 15px;
+
+  border-radius: 6px;
+
+  background: #e50914;
+
+  color: white;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.nav-signup:hover {
+  background: #f6121d;
+}
+
+.profile-pill {
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+}
+
+.profile-nav-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-nav-info strong {
+  color: white;
+
+  font-size: 12px;
+}
+
+.profile-nav-info span {
+  color: #71717a;
+
+  font-size: 10px;
+}
+
+.logout-button {
+  padding: 8px 10px;
+
+  background: transparent;
+
+  color: #71717a;
+
+  font-size: 11px;
+}
+
+.logout-button:hover {
+  color: #f87171;
+}
+
+
+/* ========================================
+   PROFILE PREVIEW
+======================================== */
+
+.profile-section {
+  width: 88%;
+  max-width: 1400px;
+
+  margin: 0 auto;
+
+  padding: 45px 0 0;
+}
+
+.profile-card {
+  display: flex;
+  align-items: center;
+
+  gap: 20px;
+
+  padding: 24px;
+
+  border: 1px solid #27272a;
+
+  border-radius: 14px;
+
+  background: #111113;
+}
+
+.large-avatar {
+  width: 70px;
+  height: 70px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 14px;
+
+  background: #e50914;
+
+  color: white;
+
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.profile-details {
+  min-width: 200px;
+}
+
+.profile-details h2 {
+  margin: 0 0 5px;
+
+  color: white;
+
+  font-size: 24px;
+}
+
+.profile-details > p:last-child {
+  color: #71717a;
+
+  font-size: 13px;
+}
+
+.profile-lists {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(100px, 1fr));
+
+  gap: 10px;
+
+  flex: 1;
+
+  margin-left: auto;
+}
+
+.profile-lists div {
+  padding: 14px;
+
+  border: 1px solid #27272a;
+
+  border-radius: 9px;
+
+  background: #18181b;
+}
+
+.profile-lists strong {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: white;
+
+  font-size: 12px;
+}
+
+.profile-lists span {
+  color: #52525b;
+
+  font-size: 10px;
+}
+
+
+/* ========================================
+   ACCOUNT MODAL
+======================================== */
+
+.modal-backdrop {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(0, 0, 0, 0.78);
+
+  backdrop-filter: blur(8px);
+}
+
+.account-modal {
+  position: relative;
+
+  width: 100%;
+  max-width: 430px;
+
+  padding: 30px;
+
+  border: 1px solid #27272a;
+
+  border-radius: 16px;
+
+  background: #111113;
+
+  box-shadow:
+    0 30px 90px rgba(0, 0, 0, 0.55);
+}
+
+.modal-close {
+  position: absolute;
+
+  top: 14px;
+  right: 17px;
+
+  border: none;
+
+  background: transparent;
+
+  color: #71717a;
+
+  font-size: 27px;
+
+  cursor: pointer;
+}
+
+.modal-close:hover {
+  color: white;
+}
+
+.account-brand {
+  margin-bottom: 24px;
+
+  color: white;
+
+  font-size: 25px;
+  font-weight: 800;
+
+  letter-spacing: -1px;
+}
+
+.account-brand span {
+  color: #e50914;
+}
+
+.account-tabs {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  margin-bottom: 26px;
+
+  padding: 4px;
+
+  border-radius: 8px;
+
+  background: #18181b;
+}
+
+.account-tab {
+  padding: 9px;
+
+  border: none;
+
+  border-radius: 6px;
+
+  background: transparent;
+
+  color: #71717a;
+
+  cursor: pointer;
+}
+
+.active-tab {
+  background: #27272a;
+
+  color: white;
+}
+
+.account-heading {
+  margin-bottom: 22px;
+}
+
+.account-heading h2 {
+  margin: 0 0 7px;
+
+  color: white;
+
+  font-size: 24px;
+}
+
+.account-heading p {
+  color: #71717a;
+
+  font-size: 13px;
+}
+
+.account-form {
+  display: flex;
+  flex-direction: column;
+
+  gap: 15px;
+}
+
+.account-form label {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+
+  color: #a1a1aa;
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.account-form input {
+  width: 100%;
+  height: 46px;
+
+  padding: 0 13px;
+
+  border: 1px solid #3f3f46;
+
+  border-radius: 7px;
+
+  outline: none;
+
+  background: #18181b;
+
+  color: white;
+
+  font-size: 13px;
+}
+
+.account-form input:focus {
+  border-color: #e50914;
+
+  box-shadow:
+    0 0 0 3px rgba(229, 9, 20, 0.12);
+}
+
+.account-form input::placeholder {
+  color: #52525b;
+}
+
+.account-submit {
+  height: 46px;
+
+  margin-top: 5px;
+
+  border: none;
+
+  border-radius: 7px;
+
+  background: #e50914;
+
+  color: white;
+
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.account-submit:hover {
+  background: #f6121d;
+}
+
+.account-submit:disabled {
+  opacity: 0.55;
+
+  cursor: not-allowed;
+}
+
+.account-error {
+  padding: 10px;
+
+  border: 1px solid #7f1d1d;
+
+  border-radius: 6px;
+
+  background: rgba(127, 29, 29, 0.15);
+
+  color: #fca5a5;
+
+  font-size: 11px;
+}
+
+.account-success {
+  padding: 10px;
+
+  border: 1px solid #14532d;
+
+  border-radius: 6px;
+
+  background: rgba(20, 83, 45, 0.15);
+
+  color: #86efac;
+
+  font-size: 11px;
+}
+
+
+/* ========================================
+   ACCOUNT RESPONSIVE
+======================================== */
+
+@media (max-width: 750px) {
+
+  .profile-nav-info {
+    display: none;
+  }
+
+  .profile-card {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
+  .profile-lists {
+    width: 100%;
+
+    grid-template-columns: 1fr;
+  }
+
+  .nav-login {
+    display: none;
+  }
+
+}
