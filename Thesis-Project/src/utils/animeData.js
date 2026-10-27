@@ -54,12 +54,26 @@ export function searchAnime(animeList, searchText) {
       .toLowerCase()
       .includes(search);
 
-    // Check if any genre matches the search text
-    const genreMatch = Array.isArray(anime.genre)
-      ? anime.genre.some(genre =>
-          genre.toLowerCase().includes(search)
-        )
-      : false;
+
+    // starts by assuming the genre does not match
+let genreMatch = false;
+
+// checks if genre is actually an array
+if (Array.isArray(anime.genre)) {
+
+  // loops through each genre
+  for (const genre of anime.genre) {
+
+    // converts the genre to lowercase
+    const genreText = genre.toLowerCase();
+
+    // checks if the genre contains the search text
+    if (genreText.includes(search)) {
+      genreMatch = true;
+      break;
+    }
+  }
+}
 
     // Keep the anime if either title or genre matches
     return titleMatch || genreMatch;
