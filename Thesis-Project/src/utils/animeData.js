@@ -56,21 +56,21 @@ export function searchAnime(animeList, searchText) {
 
 
     // starts by assuming the genre does not match
-let genreMatch = false;
+  let genreMatch = false;
 
-// checks if genre is actually an array
-if (Array.isArray(anime.genre)) {
+  // checks if genre is actually an array
+  if (Array.isArray(anime.genre)) {
 
-  // loops through each genre
-  for (const genre of anime.genre) {
+    // loops through each genre
+    for (const genre of anime.genre) {
 
-    // converts the genre to lowercase
-    const genreText = genre.toLowerCase();
+      // converts the genre to lowercase
+      const genreText = genre.toLowerCase();
 
-    // checks if the genre contains the search text
-    if (genreText.includes(search)) {
-      genreMatch = true;
-      break;
+      // checks if the genre contains the search text
+      if (genreText.includes(search)) {
+        genreMatch = true;
+        break;
     }
   }
 }

@@ -197,6 +197,9 @@ html {
 
 .development-section,
 .analytics-section,
+.recommendation-section,
+.personalized-section,
+.collaborative-section,
 .explorer {
   width: 88%;
   max-width: 1400px;
@@ -788,6 +791,343 @@ footer p {
 
 
 /* ========================================
+   WEEK 6 RECOMMENDER
+======================================== */
+
+.recommendation-section {
+  padding-top: 36px;
+}
+
+.recommendation-search {
+  max-width: 620px;
+  margin-bottom: 28px;
+}
+
+.recommendation-search label {
+  display: block;
+  margin-bottom: 7px;
+  color: #a1a1aa;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+
+.recommendation-search-box {
+  position: relative;
+}
+
+.recommendation-search input {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  border: 1px solid #3f3f46;
+  border-radius: 8px;
+  outline: none;
+  background: #18181b;
+  color: white;
+  font-size: 14px;
+}
+
+.recommendation-search input:focus {
+  border-color: #e50914;
+  box-shadow:
+    0 0 0 3px rgba(229, 9, 20, 0.12);
+}
+
+.recommendation-search input::placeholder {
+  color: #71717a;
+}
+
+.recommendation-search-results {
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 0;
+  right: 0;
+  z-index: 25;
+  overflow: hidden;
+  border: 1px solid #3f3f46;
+  border-radius: 10px;
+  background: #111113;
+  box-shadow:
+    0 18px 45px rgba(0, 0, 0, 0.45);
+}
+
+.recommendation-search-results button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 13px 14px;
+  border: none;
+  border-bottom: 1px solid #27272a;
+  background: transparent;
+  color: white;
+  text-align: left;
+  cursor: pointer;
+}
+
+.recommendation-search-results button:last-child {
+  border-bottom: none;
+}
+
+.recommendation-search-results button:hover {
+  background: #18181b;
+}
+
+.search-result-text {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.search-result-text strong {
+  overflow: hidden;
+  color: white;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.search-result-text span {
+  color: #71717a;
+  font-size: 10px;
+}
+
+.search-result-genres {
+  flex-shrink: 0;
+  color: #a1a1aa;
+  font-size: 10px;
+}
+
+.recommendation-no-results {
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 0;
+  right: 0;
+  z-index: 25;
+  padding: 14px;
+  border: 1px solid #3f3f46;
+  border-radius: 10px;
+  background: #111113;
+  color: #71717a;
+  font-size: 12px;
+}
+
+
+.selected-recommendation-anime {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+  padding: 18px 20px;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  background: #111113;
+}
+
+.recommendation-label {
+  display: block;
+  margin-bottom: 5px;
+  color: #71717a;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.selected-recommendation-anime h3 {
+  margin: 0;
+  color: white;
+  font-size: 20px;
+}
+
+.selected-score {
+  flex-shrink: 0;
+  padding: 7px 10px;
+  border-radius: 6px;
+  background: #27272a;
+  color: #facc15;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.recommendation-results {
+  margin-top: 10px;
+}
+
+.recommendation-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(5, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.recommendation-card {
+  overflow: hidden;
+  border-radius: 9px;
+  background: #111113;
+  transition:
+    transform 0.22s ease,
+    background 0.22s ease;
+}
+
+.recommendation-card:hover {
+  transform: translateY(-5px) scale(1.02);
+  background: #18181b;
+}
+
+.recommendation-poster {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 2 / 3;
+  background: #18181b;
+}
+
+.recommendation-poster img,
+.recommendation-poster .no-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.recommendation-poster img {
+  transition: transform 0.3s ease;
+}
+
+.recommendation-card:hover
+.recommendation-poster img {
+  transform: scale(1.04);
+}
+
+.recommendation-card-info {
+  padding: 12px;
+}
+
+.recommendation-card-info h3 {
+  overflow: hidden;
+  margin: 0 0 5px;
+  color: white;
+  font-size: 14px;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recommendation-empty {
+  padding: 55px 20px;
+  border: 1px dashed #3f3f46;
+  border-radius: 12px;
+  background: #111113;
+  text-align: center;
+}
+
+.recommendation-empty-icon {
+  margin-bottom: 10px;
+  color: #e50914;
+  font-size: 30px;
+}
+
+.recommendation-empty h3 {
+  margin: 0 0 6px;
+  color: white;
+}
+
+.recommendation-empty p {
+  margin: 0;
+  color: #71717a;
+  font-size: 13px;
+}
+
+
+/* ========================================
+   WEEK 7 PERSONALIZED RECOMMENDATIONS
+======================================== */
+
+.personalized-section {
+  padding-top: 36px;
+}
+
+.personalized-message {
+  padding: 42px 24px;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  background: #111113;
+  text-align: center;
+}
+
+.personalized-message h3 {
+  margin: 0 0 8px;
+  color: white;
+  font-size: 18px;
+}
+
+.personalized-message p {
+  max-width: 560px;
+  margin: 0 auto;
+  color: #71717a;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.personalized-message button {
+  margin-top: 18px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 7px;
+  background: #e50914;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.personalized-message button:hover {
+  background: #f6121d;
+}
+
+.error-message {
+  border-color: #7f1d1d;
+}
+
+.personalized-summary {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.personalized-summary div {
+  padding: 18px;
+  border: 1px solid #27272a;
+  border-radius: 10px;
+  background: #111113;
+}
+
+.personalized-summary span {
+  display: block;
+  margin-bottom: 5px;
+  color: #71717a;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+
+.personalized-summary strong {
+  color: white;
+  font-size: 20px;
+}
+
+.personalized-results {
+  margin-top: 5px;
+}
+
+
+/* ========================================
    RESPONSIVE
 ======================================== */
 
@@ -796,6 +1136,11 @@ footer p {
   .anime-grid {
     grid-template-columns:
       repeat(4, minmax(0, 1fr));
+  }
+
+  .recommendation-grid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
   }
 
 }
@@ -830,6 +1175,11 @@ footer p {
       repeat(3, minmax(0, 1fr));
   }
 
+  .recommendation-grid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
 }
 
 
@@ -855,6 +1205,9 @@ footer p {
 
   .development-section,
   .analytics-section,
+  .recommendation-section,
+  .personalized-section,
+  .collaborative-section,
   .explorer {
     width: calc(100% - 40px);
   }
@@ -876,6 +1229,20 @@ footer p {
   .anime-grid {
     grid-template-columns:
       repeat(2, minmax(0, 1fr));
+  }
+
+  .recommendation-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .selected-recommendation-anime {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .personalized-summary {
+    grid-template-columns: 1fr;
   }
 
   footer {
@@ -1349,4 +1716,56 @@ footer p {
     display: none;
   }
 
+}
+
+/* ========================================
+   ANIME PREFERENCE BUTTONS
+======================================== */
+
+.anime-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.anime-action {
+  width: 100%;
+  padding: 7px 8px;
+  border: 1px solid #3f3f46;
+  border-radius: 6px;
+  background: #18181b;
+  color: #a1a1aa;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.anime-action:hover {
+  border-color: #52525b;
+  background: #27272a;
+  color: white;
+}
+
+.active-action {
+  border-color: #e50914;
+  background: rgba(229, 9, 20, 0.12);
+  color: #ff6b73;
+}
+
+
+/* ========================================
+   WEEK 8 COLLABORATIVE RECOMMENDATIONS
+======================================== */
+
+.collaborative-section {
+  padding-top: 36px;
+}
+
+.collaborative-results {
+  margin-top: 5px;
 }

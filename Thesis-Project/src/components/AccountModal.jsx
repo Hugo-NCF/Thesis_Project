@@ -7,50 +7,65 @@ function AccountModal({
   onClose,
   onLogin
 }) {
-  // stores signup form values
+  // login / signup fields
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
-
-  // stores login username/email
   const [identifier, setIdentifier] = useState('')
-
-  // stores password for either form
   const [password, setPassword] = useState('')
 
-  // stores success messages
-  const [message, setMessage] = useState('')
+  // password reset fields
+  const [resetMode, setResetMode] = useState(false)
+  const [resetStep, setResetStep] = useState('request')
+  const [resetIdentifier, setResetIdentifier] = useState('')
+  const [resetCode, setResetCode] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
 
-  // stores error messages
+  // form messages
   const [error, setError] = useState('')
-
-  // stores whether a request is currently being sent
+  const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
 
 
-  // ----------------------------------------------------------
-  // SIGN UP
-  // ----------------------------------------------------------
+  function clearMessages() {
+    setError('')
+    setSuccess('')
+  }
+
+
+  function openPasswordReset() {
+    clearMessages()
+
+    // reuse anything already typed into login
+    setResetIdentifier(identifier)
+
+    setResetMode(true)
+    setResetStep('request')
+  }
+
+
+  function returnToLogin() {
+    clearMessages()
+    setResetMode(false)
+    setResetStep('request')
+    setMode('login')
+  }
+
 
   async function handleRegister(event) {
-    // prevent the browser from refreshing the page
     event.preventDefault()
 
-    // clear old messages
-    setMessage('')
-    setError('')
+    clearMessages()
     setLoading(true)
 
     try {
-      // send signup information to the Flask API
       const response = await fetch(
         'http://127.0.0.1:5000/api/register',
         {
           method: 'POST',
-
           headers: {
             'Content-Type': 'application/json'
           },
-
           body: JSON.stringify({
             username: username,
             email: email,
@@ -59,62 +74,47 @@ function AccountModal({
         }
       )
 
-      // convert API response into JavaScript
       const data = await response.json()
 
-      // show API error if signup failed
       if (!response.ok) {
-        setError(data.error || 'Account creation failed')
-        return
+        throw new Error(
+          data.error || 'Could not create account'
+        )
       }
 
-      // show success message
-      setMessage('Account created successfully. You can now log in.')
-
-      // clear the signup form
-      setUsername('')
-      setEmail('')
-      setPassword('')
-
-      // switch to login after successful signup
-      setMode('login')
-
-    } catch {
-      // happens if React cannot reach Flask
-      setError(
-        'Could not connect to the AniMatch backend.'
+      setSuccess(
+        'Account created. You can now log in.'
       )
 
+      setIdentifier(username)
+      setPassword('')
+      setMode('login')
+
+    } catch (err) {
+      setError(
+        err.message ||
+        'Could not connect to the AniMatch backend'
+      )
     } finally {
       setLoading(false)
     }
   }
 
 
-  // ----------------------------------------------------------
-  // LOGIN
-  // ----------------------------------------------------------
-
   async function handleLogin(event) {
-    // prevent the browser from refreshing
     event.preventDefault()
 
-    // clear old messages
-    setMessage('')
-    setError('')
+    clearMessages()
     setLoading(true)
 
     try {
-      // send login information to Flask
       const response = await fetch(
         'http://127.0.0.1:5000/api/login',
         {
           method: 'POST',
-
           headers: {
             'Content-Type': 'application/json'
           },
-
           body: JSON.stringify({
             identifier: identifier,
             password: password
@@ -122,27 +122,136 @@ function AccountModal({
         }
       )
 
-      // convert the API response into JavaScript
       const data = await response.json()
 
-      // show error if login failed
       if (!response.ok) {
-        setError(data.error || 'Login failed')
-        return
+        throw new Error(
+          data.error || 'Login failed'
+        )
       }
 
-      // send logged-in user information back to App.jsx
       onLogin(data.user)
-
-      // close the account window
       onClose()
 
-    } catch {
-      // happens if Flask is not running
+    } catch (err) {
       setError(
-        'Could not connect to the AniMatch backend.'
+        err.message ||
+        'Could not connect to the AniMatch backend'
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
+
+  async function handleResetRequest(event) {
+    event.preventDefault()
+
+    clearMessages()
+    setLoading(true)
+
+    try {
+      const response = await fetch(
+        'http://127.0.0.1:5000/api/password-reset/request',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            identifier: resetIdentifier
+          })
+        }
       )
 
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+          'Could not create reset code'
+        )
+      }
+
+      setSuccess(
+        'Reset code created. Check the Flask terminal.'
+      )
+
+      setResetStep('confirm')
+
+    } catch (err) {
+      setError(
+        err.message ||
+        'Could not connect to the AniMatch backend'
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
+
+  async function handleResetConfirm(event) {
+    event.preventDefault()
+
+    clearMessages()
+
+    if (newPassword !== confirmPassword) {
+      setError('Passwords do not match')
+      return
+    }
+
+    if (newPassword.length < 6) {
+      setError(
+        'Password must be at least 6 characters'
+      )
+      return
+    }
+
+    setLoading(true)
+
+    try {
+      const response = await fetch(
+        'http://127.0.0.1:5000/api/password-reset/confirm',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            identifier: resetIdentifier,
+            code: resetCode,
+            new_password: newPassword
+          })
+        }
+      )
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+          'Could not reset password'
+        )
+      }
+
+      setSuccess(
+        'Password reset successfully. You can now log in.'
+      )
+
+      setIdentifier(resetIdentifier)
+      setPassword('')
+      setResetCode('')
+      setNewPassword('')
+      setConfirmPassword('')
+      setResetMode(false)
+      setResetStep('request')
+      setMode('login')
+
+    } catch (err) {
+      setError(
+        err.message ||
+        'Could not connect to the AniMatch backend'
+      )
     } finally {
       setLoading(false)
     }
@@ -154,8 +263,6 @@ function AccountModal({
 
       <div className="account-modal">
 
-        {/* CLOSE BUTTON */}
-
         <button
           className="modal-close"
           onClick={onClose}
@@ -165,204 +272,404 @@ function AccountModal({
         </button>
 
 
-        {/* ANI MATCH LOGO */}
-
         <div className="account-brand">
           Ani<span>Match</span>
         </div>
 
 
-        {/* LOGIN / SIGNUP SWITCH */}
+        {!resetMode && (
 
-        <div className="account-tabs">
+          <>
+            <div className="account-tabs">
 
-          <button
-            className={
-              mode === 'login'
-                ? 'account-tab active-tab'
-                : 'account-tab'
-            }
-            onClick={() => {
-              setMode('login')
-              setError('')
-              setMessage('')
-            }}
-          >
-            Login
-          </button>
+              <button
+                className={
+                  mode === 'login'
+                    ? 'account-tab active-tab'
+                    : 'account-tab'
+                }
+                onClick={() => {
+                  clearMessages()
+                  setMode('login')
+                }}
+              >
+                Login
+              </button>
 
+              <button
+                className={
+                  mode === 'register'
+                    ? 'account-tab active-tab'
+                    : 'account-tab'
+                }
+                onClick={() => {
+                  clearMessages()
+                  setMode('register')
+                }}
+              >
+                Sign Up
+              </button>
 
-          <button
-            className={
-              mode === 'register'
-                ? 'account-tab active-tab'
-                : 'account-tab'
-            }
-            onClick={() => {
-              setMode('register')
-              setError('')
-              setMessage('')
-            }}
-          >
-            Sign Up
-          </button>
-
-        </div>
-
-
-        {/* LOGIN FORM */}
-
-        {mode === 'login' && (
-
-          <form
-            className="account-form"
-            onSubmit={handleLogin}
-          >
-
-            <div className="account-heading">
-              <h2>Welcome back</h2>
-
-              <p>
-                Log in to your AniMatch account.
-              </p>
             </div>
 
 
-            <label>
-              Username or Email
+            {mode === 'login' ? (
 
-              <input
-                type="text"
-                placeholder="Enter username or email"
-                value={identifier}
-                onChange={(event) =>
-                  setIdentifier(event.target.value)
-                }
-              />
-            </label>
+              <>
+                <div className="account-heading">
 
+                  <h2>
+                    Welcome back
+                  </h2>
 
-            <label>
-              Password
+                  <p>
+                    Log in to your AniMatch account.
+                  </p>
 
-              <input
-                type="password"
-                placeholder="Enter password"
-                value={password}
-                onChange={(event) =>
-                  setPassword(event.target.value)
-                }
-              />
-            </label>
+                </div>
 
 
-            {error && (
-              <p className="account-error">
-                {error}
-              </p>
+                <form
+                  className="account-form"
+                  onSubmit={handleLogin}
+                >
+
+                  <label>
+                    Username or Email
+
+                    <input
+                      type="text"
+                      value={identifier}
+                      onChange={(event) =>
+                        setIdentifier(
+                          event.target.value
+                        )
+                      }
+                      placeholder="Enter username or email"
+                      required
+                    />
+                  </label>
+
+
+                  <label>
+                    Password
+
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(event) =>
+                        setPassword(
+                          event.target.value
+                        )
+                      }
+                      placeholder="Enter password"
+                      required
+                    />
+                  </label>
+
+
+                  <button
+                    type="button"
+                    className="forgot-password-button"
+                    onClick={openPasswordReset}
+                  >
+                    Forgot Password?
+                  </button>
+
+
+                  {error && (
+                    <div className="account-error">
+                      {error}
+                    </div>
+                  )}
+
+                  {success && (
+                    <div className="account-success">
+                      {success}
+                    </div>
+                  )}
+
+
+                  <button
+                    className="account-submit"
+                    type="submit"
+                    disabled={loading}
+                  >
+                    {loading
+                      ? 'Logging in...'
+                      : 'Login'}
+                  </button>
+
+                </form>
+              </>
+
+            ) : (
+
+              <>
+                <div className="account-heading">
+
+                  <h2>
+                    Create your account
+                  </h2>
+
+                  <p>
+                    Start building your AniMatch profile.
+                  </p>
+
+                </div>
+
+
+                <form
+                  className="account-form"
+                  onSubmit={handleRegister}
+                >
+
+                  <label>
+                    Username
+
+                    <input
+                      type="text"
+                      value={username}
+                      onChange={(event) =>
+                        setUsername(
+                          event.target.value
+                        )
+                      }
+                      placeholder="Choose a username"
+                      required
+                    />
+                  </label>
+
+
+                  <label>
+                    Email
+
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(event) =>
+                        setEmail(
+                          event.target.value
+                        )
+                      }
+                      placeholder="Enter your email"
+                      required
+                    />
+                  </label>
+
+
+                  <label>
+                    Password
+
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(event) =>
+                        setPassword(
+                          event.target.value
+                        )
+                      }
+                      placeholder="At least 6 characters"
+                      required
+                    />
+                  </label>
+
+
+                  {error && (
+                    <div className="account-error">
+                      {error}
+                    </div>
+                  )}
+
+                  {success && (
+                    <div className="account-success">
+                      {success}
+                    </div>
+                  )}
+
+
+                  <button
+                    className="account-submit"
+                    type="submit"
+                    disabled={loading}
+                  >
+                    {loading
+                      ? 'Creating account...'
+                      : 'Create Account'}
+                  </button>
+
+                </form>
+              </>
+
             )}
-
-
-            {message && (
-              <p className="account-success">
-                {message}
-              </p>
-            )}
-
-
-            <button
-              className="account-submit"
-              type="submit"
-              disabled={loading}
-            >
-              {loading
-                ? 'Logging in...'
-                : 'Login'}
-            </button>
-
-          </form>
+          </>
 
         )}
 
 
-        {/* SIGN UP FORM */}
+        {resetMode && (
 
-        {mode === 'register' && (
-
-          <form
-            className="account-form"
-            onSubmit={handleRegister}
-          >
-
+          <>
             <div className="account-heading">
-              <h2>Create your account</h2>
+
+              <h2>
+                Reset Password
+              </h2>
 
               <p>
-                Start building your AniMatch profile.
+                {resetStep === 'request'
+                  ? 'Enter your username or email to create a temporary reset code.'
+                  : 'Enter the code shown in your Flask terminal and choose a new password.'}
               </p>
+
             </div>
 
 
-            <label>
-              Username
+            {resetStep === 'request' ? (
 
-              <input
-                type="text"
-                placeholder="Choose a username"
-                value={username}
-                onChange={(event) =>
-                  setUsername(event.target.value)
-                }
-              />
-            </label>
+              <form
+                className="account-form"
+                onSubmit={handleResetRequest}
+              >
 
+                <label>
+                  Username or Email
 
-            <label>
-              Email
-
-              <input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(event) =>
-                  setEmail(event.target.value)
-                }
-              />
-            </label>
+                  <input
+                    type="text"
+                    value={resetIdentifier}
+                    onChange={(event) =>
+                      setResetIdentifier(
+                        event.target.value
+                      )
+                    }
+                    placeholder="Enter username or email"
+                    required
+                  />
+                </label>
 
 
-            <label>
-              Password
+                {error && (
+                  <div className="account-error">
+                    {error}
+                  </div>
+                )}
 
-              <input
-                type="password"
-                placeholder="Create a password"
-                value={password}
-                onChange={(event) =>
-                  setPassword(event.target.value)
-                }
-              />
-            </label>
+                {success && (
+                  <div className="account-success">
+                    {success}
+                  </div>
+                )}
 
 
-            {error && (
-              <p className="account-error">
-                {error}
-              </p>
+                <button
+                  className="account-submit"
+                  type="submit"
+                  disabled={loading}
+                >
+                  {loading
+                    ? 'Creating code...'
+                    : 'Send Reset Code'}
+                </button>
+
+              </form>
+
+            ) : (
+
+              <form
+                className="account-form"
+                onSubmit={handleResetConfirm}
+              >
+
+                <label>
+                  Reset Code
+
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={resetCode}
+                    onChange={(event) =>
+                      setResetCode(
+                        event.target.value
+                      )
+                    }
+                    placeholder="6-digit code"
+                    required
+                  />
+                </label>
+
+
+                <label>
+                  New Password
+
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(event) =>
+                      setNewPassword(
+                        event.target.value
+                      )
+                    }
+                    placeholder="At least 6 characters"
+                    required
+                  />
+                </label>
+
+
+                <label>
+                  Confirm New Password
+
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(event) =>
+                      setConfirmPassword(
+                        event.target.value
+                      )
+                    }
+                    placeholder="Type password again"
+                    required
+                  />
+                </label>
+
+
+                {error && (
+                  <div className="account-error">
+                    {error}
+                  </div>
+                )}
+
+                {success && (
+                  <div className="account-success">
+                    {success}
+                  </div>
+                )}
+
+
+                <button
+                  className="account-submit"
+                  type="submit"
+                  disabled={loading}
+                >
+                  {loading
+                    ? 'Resetting password...'
+                    : 'Reset Password'}
+                </button>
+
+              </form>
+
             )}
 
 
             <button
-              className="account-submit"
-              type="submit"
-              disabled={loading}
+              type="button"
+              className="back-to-login-button"
+              onClick={returnToLogin}
             >
-              {loading
-                ? 'Creating account...'
-                : 'Create Account'}
+              Back to Login
             </button>
 
-          </form>
+          </>
 
         )}
 

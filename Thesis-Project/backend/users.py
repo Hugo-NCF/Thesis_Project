@@ -1,87 +1,85 @@
 import bcrypt
+
 from database import get_users_collection
 
+
+# ----------------------------------------------------------
+# ACCOUNT FUNCTIONS
+# ----------------------------------------------------------
+
 def create_user(username, email, password):
-    # get user collection
     users_collection = get_users_collection()
 
     # check if username already exists
     if users_collection.find_one({"username": username}):
-        return {"error": "Username already exists"}
+        return {
+            "error": "Username already exists"
+        }
 
     # check if email already exists
     if users_collection.find_one({"email": email}):
-        return {"error": "Email already exists"}
+        return {
+            "error": "Email already exists"
+        }
 
-    # convert password to bytes
-    password_bytes = password.encode('utf-8')
-
-    # hash the password
-    hashed_password = bcrypt.hashpw(
-        password_bytes,
+    # hash the password before saving it
+    password_hash = bcrypt.hashpw(
+        password.encode("utf-8"),
         bcrypt.gensalt()
     )
 
-    # convert hashed password to string
-    hashed_password_str = hashed_password.decode('utf-8')
-
-    # build user dictionary
+    # create the user document
     user = {
         "username": username,
         "email": email,
-        "password_hash": hashed_password_str,
+        "password_hash": password_hash.decode("utf-8"),
         "favorites": [],
         "watchlist": [],
         "watched": []
     }
 
-    # insert user into MongoDB
     result = users_collection.insert_one(user)
 
-    # return success message and new user id
     return {
         "message": "User created successfully",
         "user_id": str(result.inserted_id)
     }
 
+
 def find_user(identifier):
-    # get user collection
     users_collection = get_users_collection()
 
-    # find user by username or email
-    user = users_collection.find_one(
-        {"$or": [{"username": identifier}, {"email": identifier}]}
-    )
+    return users_collection.find_one({
+        "$or": [
+            {"username": identifier},
+            {"email": identifier}
+        ]
+    })
 
-    # Returns matching user 
-    return user
 
 def verify_password(password, password_hash):
-    # convert password to bytes
-    password_bytes = password.encode('utf-8')
-    # convert password hash to bytes
-    password_hash_bytes = password_hash.encode('utf-8')
+    return bcrypt.checkpw(
+        password.encode("utf-8"),
+        password_hash.encode("utf-8")
+    )
 
-    # check if password matches the hash
-    return bcrypt.checkpw(password_bytes, password_hash_bytes)
 
 def login_user(identifier, password):
-    # find user by username or email
     user = find_user(identifier)
 
-    # if user not found, return error
     if not user:
-        return {"error": "User not found"}
+        return {
+            "error": "User not found"
+        }
 
-    # get stored password hash
-    stored_password_hash = user["password_hash"]
+    if not verify_password(
+        password,
+        user["password_hash"]
+    ):
+        return {
+            "error": "Incorrect password"
+        }
 
-    # verify password
-    if not verify_password(password, stored_password_hash):
-        # if wrong password, return error
-        return {"error": "Incorrect password"}
-
-    # if correct, return success + basic user info
     return {
         "message": "Login successful",
         "user": {
@@ -90,178 +88,274 @@ def login_user(identifier, password):
         }
     }
 
+
+def reset_password(identifier, new_password):
+    """
+    Reset a user's password after the reset code
+    has already been verified by the API.
+    """
+
+    users_collection = get_users_collection()
+
+    user = find_user(identifier)
+
+    if not user:
+        return {
+            "error": "User not found"
+        }
+
+    password_hash = bcrypt.hashpw(
+        new_password.encode("utf-8"),
+        bcrypt.gensalt()
+    )
+
+    users_collection.update_one(
+        {
+            "_id": user["_id"]
+        },
+        {
+            "$set": {
+                "password_hash":
+                    password_hash.decode("utf-8")
+            }
+        }
+    )
+
+    return {
+        "message": "Password reset successfully"
+    }
+
+
+# ----------------------------------------------------------
+# FAVORITES
+# ----------------------------------------------------------
+
 def add_favorite(identifier, anime_id):
-    # finds the user
-    user = find_user(identifier)
-
-    # if user not found, return error
-    if not user:
-        return {"error": "User not found"}
-    
-    # gets user collection
     users_collection = get_users_collection()
 
-    # updates the user's favorites list using $addToSet
-    result = users_collection.update_one(
+    user = find_user(identifier)
+
+    if not user:
+        return {
+            "error": "User not found"
+        }
+
+    if anime_id in user.get("favorites", []):
+        return {
+            "message": "Anime already in favorites"
+        }
+
+    users_collection.update_one(
         {"_id": user["_id"]},
-        {"$addToSet": {"favorites": anime_id}}
+        {
+            "$addToSet": {
+                "favorites": anime_id
+            }
+        }
     )
 
-    # returns success message
-    if result.modified_count > 0:
-        return {"message": "Anime added to favorites"}
-    else:
-        return {"message": "Anime was already in favorites"}
-    
+    return {
+        "message": "Anime added to favorites"
+    }
+
+
 def remove_favorite(identifier, anime_id):
-    # finds user
-    user = find_user(identifier)
-
-    # if user not found, return error
-    if not user:
-        return {"error": "User not found"}
-    
-    # gets user collection
     users_collection = get_users_collection()
 
-    # remove anime from user's favorites list using $pull
-    result = users_collection.update_one(
+    user = find_user(identifier)
+
+    if not user:
+        return {
+            "error": "User not found"
+        }
+
+    users_collection.update_one(
         {"_id": user["_id"]},
-        {"$pull": {"favorites": anime_id}}
+        {
+            "$pull": {
+                "favorites": anime_id
+            }
+        }
     )
 
-    # returns whether any anime was removed from favorites
-    if result.modified_count > 0:
-        return {"message": "Anime removed from favorites"}
-    else:
-        return {"message": "Anime was not in favorites"}
+    return {
+        "message": "Anime removed from favorites"
+    }
+
+
+def get_favorites(identifier):
+    user = find_user(identifier)
+
+    if not user:
+        return {
+            "error": "User not found"
+        }
+
+    return user.get("favorites", [])
+
+
+# ----------------------------------------------------------
+# WATCHLIST
+# ----------------------------------------------------------
 
 def add_to_watchlist(identifier, anime_id):
-    # finds the user
-    user = find_user(identifier)
-
-    # if user not found, return error
-    if not user:
-        return {"error": "User not found"}
-    
-    # gets user collection
     users_collection = get_users_collection()
 
-    # updates the user's watchlist using $addToSet
-    result = users_collection.update_one(
+    user = find_user(identifier)
+
+    if not user:
+        return {
+            "error": "User not found"
+        }
+
+    if anime_id in user.get("watchlist", []):
+        return {
+            "message": "Anime already in watchlist"
+        }
+
+    users_collection.update_one(
         {"_id": user["_id"]},
-        {"$addToSet": {"watchlist": anime_id}}
+        {
+            "$addToSet": {
+                "watchlist": anime_id
+            }
+        }
     )
 
-    # returns success message
-    if result.modified_count > 0:
-        return {"message": "Anime added to watchlist"}
-    else:
-        return {"message": "Anime was already in watchlist"}
-    
+    return {
+        "message": "Anime added to watchlist"
+    }
+
+
 def remove_from_watchlist(identifier, anime_id):
-    # finds user
-    user = find_user(identifier)
-
-    # if user not found, return error
-    if not user:
-        return {"error": "User not found"}
-    
-    # gets user collection
     users_collection = get_users_collection()
 
-    # remove anime from user's watchlist using $pull
-    result = users_collection.update_one(
-        {"_id": user["_id"]},
-        {"$pull": {"watchlist": anime_id}}
-    )
-
-    # returns whether any anime was removed from watchlist
-    if result.modified_count > 0:
-        return {"message": "Anime removed from watchlist"}
-    else:
-        return {"message": "Anime was not in watchlist"}
-    
-def mark_as_watched(identifier, anime_id):
-    # finds the user
     user = find_user(identifier)
 
-    # if user not found, return error
     if not user:
-        return {"error": "User not found"}
-    
-    # gets user collection
-    users_collection = get_users_collection()
+        return {
+            "error": "User not found"
+        }
 
-    # updates the user's watched list using $addToSet
-    result = users_collection.update_one(
+    users_collection.update_one(
         {"_id": user["_id"]},
-        {"$addToSet": {"watched": anime_id}}
+        {
+            "$pull": {
+                "watchlist": anime_id
+            }
+        }
     )
 
-    # returns success message
-    if result.modified_count > 0:
-        return {"message": "Anime marked as watched"}
-    else:
-        return {"message": "Anime was already marked as watched"}
-    
-def remove_from_watched(identifier, anime_id):
-    # finds user
-    user = find_user(identifier)
+    return {
+        "message": "Anime removed from watchlist"
+    }
 
-    # if user not found, return error
-    if not user:
-        return {"error": "User not found"}
-    
-    # gets user collection
-    users_collection = get_users_collection()
-
-    # remove anime from user's watched list using $pull
-    result = users_collection.update_one(
-        {"_id": user["_id"]},
-        {"$pull": {"watched": anime_id}}
-    )
-
-    # returns whether any anime was removed from watched list
-    if result.modified_count > 0:
-        return {"message": "Anime removed from watched list"}
-    else:
-        return {"message": "Anime was not in watched list"}
-
-# helper functions
-def get_favorites(identifier):
-    # finds the user
-    user = find_user(identifier)
-
-    # if user not found, return error
-    if not user:
-        return {"error": "User not found"}
-    
-    # returns users favorites list
-    return {"favorites": user.get("favorites", [])}
 
 def get_watchlist(identifier):
-    # finds the user
     user = find_user(identifier)
 
-    # if user not found, return error
     if not user:
-        return {"error": "User not found"}
-    
-    # returns users watchlist
-    return {"watchlist": user.get("watchlist", [])}
+        return {
+            "error": "User not found"
+        }
+
+    return user.get("watchlist", [])
+
+
+# ----------------------------------------------------------
+# WATCHED
+# ----------------------------------------------------------
+
+def mark_as_watched(identifier, anime_id):
+    users_collection = get_users_collection()
+
+    user = find_user(identifier)
+
+    if not user:
+        return {
+            "error": "User not found"
+        }
+
+    if anime_id in user.get("watched", []):
+        return {
+            "message": "Anime already marked as watched"
+        }
+
+    users_collection.update_one(
+        {"_id": user["_id"]},
+        {
+            "$addToSet": {
+                "watched": anime_id
+            }
+        }
+    )
+
+    return {
+        "message": "Anime marked as watched"
+    }
+
+
+def remove_from_watched(identifier, anime_id):
+    users_collection = get_users_collection()
+
+    user = find_user(identifier)
+
+    if not user:
+        return {
+            "error": "User not found"
+        }
+
+    users_collection.update_one(
+        {"_id": user["_id"]},
+        {
+            "$pull": {
+                "watched": anime_id
+            }
+        }
+    )
+
+    return {
+        "message": "Anime removed from watched"
+    }
+
 
 def get_watched(identifier):
-    # finds the user
     user = find_user(identifier)
 
-    # if user not found, return error
     if not user:
-        return {"error": "User not found"}
-    
-    # returns users watched list
-    return {"watched": user.get("watched", [])}
+        return {
+            "error": "User not found"
+        }
+
+    return user.get("watched", [])
 
 
 
-# testing for user creation 
+# ----------------------------------------------------------
+# WEEK 8
+# COLLABORATIVE FILTERING
+# ----------------------------------------------------------
+
+def get_all_users():
+    users_collection = get_users_collection()
+
+    users = []
+
+    for user in users_collection.find():
+        users.append({
+            "username": user.get("username"),
+            "favorites": user.get(
+                "favorites",
+                []
+            ),
+            "watchlist": user.get(
+                "watchlist",
+                []
+            ),
+            "watched": user.get(
+                "watched",
+                []
+            )
+        })
+
+    return users
