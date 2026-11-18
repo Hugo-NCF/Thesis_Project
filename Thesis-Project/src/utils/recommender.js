@@ -471,3 +471,193 @@ export function recommendFromSimilarUsers(
         candidate[0]
     )
 }
+
+// ----------------------------------------------------------
+// WEEK 9
+// HYBRID RECOMMENDER
+// ----------------------------------------------------------
+
+// combine scores from content-based, personalized, and collaborative recommendations 
+export function calculateHybridScore(
+  contentScore,
+  personalizedScore,
+  collaborativeScore
+) {
+  // Define weights for each recommendation type
+  const contentWeight = 0.4
+  const personalizedWeight = 0.3
+  const collaborativeWeight = 0.3
+
+  // Calculate the weighted hybrid score
+  const hybridScore =
+    contentScore * contentWeight +
+    personalizedScore * personalizedWeight +
+    collaborativeScore * collaborativeWeight
+
+  return hybridScore
+}
+
+export function recommendHybridAnime(animeList,favoriteIds,watchlistIds,watchedIds,otherUsers) {
+  // combine user's saved anime
+  const userAnimeIds = [
+    ...new Set([
+      ...favoriteIds,
+      ...watchlistIds,
+      ...watchedIds
+    ])
+  ]
+
+  // build genre profile
+  const genreProfile =
+    buildGenreProfile(
+      animeList,
+      userAnimeIds
+    )
+
+  // create recommendation array
+  const recommendations = []
+
+  // loop through anime
+  for (const anime of animeList) {
+
+    // don't recommend anime already saved
+    const alreadySeen =
+      userAnimeIds.some(
+        animeId =>
+          String(animeId) ===
+          String(anime.uid)
+      )
+      // do not recommend anime already saved
+    if (alreadySeen) {
+      continue
+    }
+
+
+    // --------------------------------
+    // PERSONALIZED SCORE
+    // --------------------------------
+
+    // calculate how well this anime matches the user's genre profile
+    const personalizedScore =
+      calculatePersonalizedScore(
+        anime,
+        genreProfile
+      )
+
+
+    // --------------------------------
+    // CONTENT SCORE
+    // --------------------------------
+
+    // calculate how similar this anime is to the user's saved anime
+    let contentScore = 0
+
+    // loop through the user's saved anime
+    for (const userAnimeId of userAnimeIds) {
+
+      // find the user's anime object in the anime list
+      const userAnime =
+        animeList.find(
+          item =>
+            String(item.uid) ===
+            String(userAnimeId)
+        )
+
+        // skip if the user's anime is not found in the anime list
+      if (!userAnime) {
+        continue
+      }
+
+      // calculate similarity between the current anime and the user's anime
+      const similarity =
+        calculateSimilarity(
+          anime,
+          userAnime
+        )
+
+        // update content score if this similarity is higher than the current content score
+      if (similarity > contentScore) {
+        contentScore = similarity
+      }
+    }
+
+
+    // --------------------------------
+    // COLLABORATIVE SCORE
+    // --------------------------------
+
+    // calculate how many similar users have this anime
+    let collaborativeScore = 0
+
+    // loop through other users
+    for (const otherUser of otherUsers) {
+
+      // combine the other user's lists
+      const otherUserAnimeIds = [
+        ...new Set([
+          ...(otherUser.favorites || []),
+          ...(otherUser.watchlist || []),
+          ...(otherUser.watched || [])
+        ])
+      ]
+
+      // calculate similarity between users
+      const userSimilarity =
+        calculateUserSimilarity(
+          userAnimeIds,
+          otherUserAnimeIds
+        )
+
+      // check if the other user has this anime
+      const otherUserHasAnime =
+        otherUserAnimeIds.some(
+          animeId =>
+            String(animeId) ===
+            String(anime.uid)
+        )
+
+      // add collaborative points
+      if (otherUserHasAnime) {
+        collaborativeScore +=
+          userSimilarity
+      }
+    }
+
+
+    // --------------------------------
+    // HYBRID SCORE
+    // --------------------------------
+
+    // combine the three scores into a hybrid score
+    const hybridScore =
+      calculateHybridScore(
+        contentScore,
+        personalizedScore,
+        collaborativeScore
+      )
+
+
+    // add candidate
+    recommendations.push({
+      anime: anime,
+      hybridScore: hybridScore
+    })
+  }
+
+
+  // sort highest hybrid score first
+  recommendations.sort(
+    (a, b) =>
+      b.hybridScore -
+      a.hybridScore
+  )
+
+
+  // return top 5
+  return recommendations
+    .slice(0, 5)
+    .map(
+      recommendation =>
+        recommendation.anime
+    )
+}

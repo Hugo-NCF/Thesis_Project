@@ -5,7 +5,8 @@ import AccountModal from './components/AccountModal'
 import {
   recommendSimilarAnime,
   recommendForUser,
-  recommendFromSimilarUsers
+  recommendFromSimilarUsers,
+  recommendHybridAnime
 } from "./utils/recommender";
 
 import {
@@ -457,6 +458,27 @@ function App() {
 
 
   // ----------------------------------------------------------
+  // WEEK 9
+  // Weighted hybrid recommendations.
+  // ----------------------------------------------------------
+
+  let hybridAnime = []
+
+  if (
+    currentUser &&
+    currentUserAnimeIds.length > 0
+  ) {
+    hybridAnime = recommendHybridAnime(
+      anime,
+      userFavorites,
+      userWatchlist,
+      userWatched,
+      otherUsers
+    )
+  }
+
+
+  // ----------------------------------------------------------
   // WEEK 2
   // Dataset statistics.
   // ----------------------------------------------------------
@@ -629,6 +651,10 @@ function App() {
 
           <a href="#community">
             Community
+          </a>
+
+          <a href="#hybrid">
+            Hybrid
           </a>
 
         </div>
@@ -1779,6 +1805,247 @@ function App() {
             <div className="recommendation-grid">
 
               {collaborativeAnime.map(
+                (item, index) => (
+
+                <article
+                  className="recommendation-card"
+                  key={
+                    item.uid ??
+                    `${item.title}-${index}`
+                  }
+                >
+
+                  <div className="recommendation-poster">
+
+                    {item.img_url ? (
+
+                      <img
+                        src={item.img_url}
+                        alt={`${item.title} poster`}
+                      />
+
+                    ) : (
+
+                      <div className="no-image">
+                        No Image
+                      </div>
+
+                    )}
+
+                    <div className="score-badge">
+                      ★ {item.score || 'N/A'}
+                    </div>
+
+                  </div>
+
+
+                  <div className="recommendation-card-info">
+
+                    <h3>
+                      {item.title}
+                    </h3>
+
+                    <p className="anime-meta">
+                      {item.episodes || 'N/A'} episodes
+                    </p>
+
+                    <div className="genres">
+
+                      {item.genre
+                        ?.slice(0, 3)
+                        .map((genre) => (
+
+                          <span key={genre}>
+                            {genre}
+                          </span>
+
+                        ))}
+
+                    </div>
+
+
+                    <div className="anime-actions">
+
+                      <button
+                        type="button"
+                        className={
+                          hasAnime(
+                            userFavorites,
+                            item.uid
+                          )
+                            ? 'anime-action active-action'
+                            : 'anime-action'
+                        }
+                        onClick={() =>
+                          updateUserPreference(
+                            'favorites',
+                            item.uid
+                          )
+                        }
+                      >
+                        ♥ Favorite
+                      </button>
+
+                      <button
+                        type="button"
+                        className={
+                          hasAnime(
+                            userWatchlist,
+                            item.uid
+                          )
+                            ? 'anime-action active-action'
+                            : 'anime-action'
+                        }
+                        onClick={() =>
+                          updateUserPreference(
+                            'watchlist',
+                            item.uid
+                          )
+                        }
+                      >
+                        + Watchlist
+                      </button>
+
+                      <button
+                        type="button"
+                        className={
+                          hasAnime(
+                            userWatched,
+                            item.uid
+                          )
+                            ? 'anime-action active-action'
+                            : 'anime-action'
+                        }
+                        onClick={() =>
+                          updateUserPreference(
+                            'watched',
+                            item.uid
+                          )
+                        }
+                      >
+                        ✓ Watched
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                </article>
+
+              ))}
+
+            </div>
+
+          </div>
+
+        )}
+
+      </section>
+
+
+      {/* WEEK 9 HYBRID RECOMMENDATIONS */}
+
+      <section
+        className="hybrid-section"
+        id="hybrid"
+      >
+
+        <div className="section-heading">
+
+          <p className="eyebrow">
+            Hybrid Recommender
+          </p>
+
+          <h2>
+            Best Overall Matches
+          </h2>
+
+          <p>
+            AniMatch combines content similarity,
+            your personal genre profile,
+            and community behavior into one
+            weighted recommendation score.
+          </p>
+
+        </div>
+
+
+        {!currentUser && (
+
+          <div className="personalized-message">
+
+            <h3>
+              Log in to use hybrid recommendations
+            </h3>
+
+            <p>
+              Hybrid recommendations need your saved anime
+              and account preferences.
+            </p>
+
+          </div>
+
+        )}
+
+
+        {currentUser &&
+          currentUserAnimeIds.length === 0 && (
+
+          <div className="personalized-message">
+
+            <h3>
+              Add some anime first
+            </h3>
+
+            <p>
+              Favorite, add to watchlist, or mark anime as watched
+              so AniMatch can build your hybrid profile.
+            </p>
+
+          </div>
+
+        )}
+
+
+        {currentUser &&
+          currentUserAnimeIds.length > 0 &&
+          hybridAnime.length === 0 && (
+
+          <div className="personalized-message">
+
+            <h3>
+              No hybrid recommendations yet
+            </h3>
+
+            <p>
+              AniMatch could not rank any new anime yet.
+            </p>
+
+          </div>
+
+        )}
+
+
+        {hybridAnime.length > 0 && (
+
+          <div className="hybrid-results">
+
+            <div className="results-heading">
+
+              <h3>
+                Top Hybrid Recommendations
+              </h3>
+
+              <span>
+                {hybridAnime.length} recommendations
+              </span>
+
+            </div>
+
+
+            <div className="recommendation-grid">
+
+              {hybridAnime.map(
                 (item, index) => (
 
                 <article
